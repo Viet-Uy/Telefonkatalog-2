@@ -9,7 +9,7 @@ def printMeny():
     print("----------------------------------------------") 
 
     menyvalg = input("Skriv inn tall for å velge fra menyen:")
-    utforerMenyvalg(menyvalg)
+    utfoerMenyvalg(menyvalg)
 
 def utfoerMenyvalg(valgtTall):
     #input returnerer string
@@ -21,16 +21,16 @@ def utfoerMenyvalg(valgtTall):
         printMeny()
 
     elif(valgtTall == "3"):
-        VisAllePersoner()
+        visAllePersoner()
 
-    elif(ValgTall == "4"):
+    elif(valgtTall == "4"):
         bekreftelse = input("Er du sikker på at du ivl avslutte? J/N")
         if bekreftelse == "J" or bekreftelse == "j":
             exit()
 
     else:
         nyttForsoek = input("Ugyldig valg. Velg et tall mellom 1-4")
-        utfoerMenyValg(nyttForseok)
+        utfoerMenyvalg(nyttForsoek)
 
 
 def registrerPerson ():
@@ -59,8 +59,6 @@ def visAllePersoner ():
             input("Trykk en tast for å gå tilbake til menyen")
             printMeny()
             
-
-
 
 def sokPerson():
     if not telefonkatalog:
