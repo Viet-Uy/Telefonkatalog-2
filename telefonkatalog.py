@@ -27,6 +27,8 @@ def utfoerMenyvalg(valgtTall):
         bekreftelse = input("Er du sikker på at du ivl avslutte? J/N")
         if bekreftelse == "J" or bekreftelse == "j":
             exit()
+        else:
+            printMeny()
 
     else:
         nyttForsoek = input("Ugyldig valg. Velg et tall mellom 1-4")
