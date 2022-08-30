@@ -3,9 +3,9 @@ import pandas as pd
 kjorer = True
 
 raw_data = {
-    'fornavn': ['Erik', 'Erik', 'Leonard', 'Howard', 'Amy'],
-    'etternavn': ['Perik', 'Erik', 'w', 'd', 'a'],
-    'telefonnummer': ["12345678", "1212121", "1221121212", "758432", "Erik"]
+    'fornavn': [],
+    'etternavn': [],
+    'telefonnummer': []
 }
 
 telefonkatalog = pd.DataFrame(raw_data, columns=['fornavn', 'etternavn', 'telefonnummer'])
