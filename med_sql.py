@@ -1,16 +1,22 @@
-from math import fabs
 import pandas as pd
+import mysql.connector
+
+mydb = mysql.connector.connect(
+    host="10.10.0.1",
+    user="simen",
+    password="1234",
+    database="telefondb"
+)
+
+mycursor = mydb.cursor()
+
+mycursor.execute("SELECT * FROM telefonkatalog")
+
+myresult = mycursor.fetchall()
 
 kjorer = True
 
-raw_data = {
-    'fornavn': [],
-    'etternavn': [],
-    'telefonnummer': []
-}
-
-telefonkatalog = pd.DataFrame(raw_data, columns=['fornavn', 'etternavn', 'telefonnummer'])
-
+telefonkatalog = pd.DataFrame(myresult, columns=['id', 'fornavn', 'etternavn', 'telefonnummer'])
 
 def printMeny():
     print("--------------- Telefonkatalog ---------------")
@@ -27,6 +33,12 @@ def registrerPerson ():
     fornavn = input("Skriv inn fornavn:")
     etternavn = input ("Skriv inn etternavn:")
     telefonnummer = input("Skriv inn telefonnummer:")
+    
+    sql = "INSERT INTO telefonkatalog (fornavn, etternavn, telefonnummer) VALUES (%s, %s, %s)"
+    val = (fornavn, etternavn, telefonnummer)
+    mycursor.execute(sql, val)
+    
+    mydb.commit()
 
     nyRegistrering = {
         "fornavn": [fornavn],
@@ -37,6 +49,9 @@ def registrerPerson ():
     newdf = pd.DataFrame(nyRegistrering, columns=["fornavn", "etternavn", "telefonnummer"])
     
     telefonkatalog = pd.concat([telefonkatalog, newdf])
+    
+    
+    
     telefonkatalog = telefonkatalog.drop_duplicates()
 
     print("{0} {1} er registrert med telefonnummer {2}".format (fornavn, etternavn, telefonnummer))
