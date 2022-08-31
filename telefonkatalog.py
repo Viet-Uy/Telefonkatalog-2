@@ -64,7 +64,7 @@ def visAllePersoner ():
 
 def sokPerson():
     if not telefonkatalog:
-        print("Det er ingen registrerte perosner i katalogen")
+        print("Det er ingen registrerte perso ner i katalogen")
         printMeny()
     else:
         print("1. Søk på fornavn")
