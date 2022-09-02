@@ -1,3 +1,4 @@
+import mysql.connector
 telefonkatalog = [] # liste med personer på formatet ["fornavn", "etternavn", "telefonnummer"] 
 
 def printMeny():
@@ -41,6 +42,7 @@ def registrerPerson ():
     telefonnummer = input("Skriv inn telefonnummer:")
 
     nyRegistrering = [fornavn, etternavn, telefonnummer]
+
     telefonkatalog.append(nyRegistrering)
 
     print("{0} {1} er registrert med telefonnummer {2}".format (fornavn, etternavn, telefonnummer))
@@ -90,24 +92,41 @@ def sokPerson():
 # typeSok angir om man søker på fornavn, etternavn eller telefonnummer
 
 def finnPerson(typeSok, sokeTekst):
-    for personer in telefonkatalog:
-        if typeSok == "fornavn":
-            if personer[0] == sokeTekst:
-                print("{0} {1} har telefonnummer {2}".format(personer[0], personer[1], personer[2]))
-            else:
-                print("Finner ingen registrerte personer med fornavn " + sokeTekst)
-                sokPerson()
-        elif typeSok == "etternavn":
-            if personer[1] == sokeTekst:
-                print("{0} {1} har telefonnummer {2}".format(personer[0], personer[1], personer[2]))
-            else:
-                print("Finner ingen registrerte personer med etternavn " + sokeTekst)
-                sokPerson()
-        elif typeSok == "telefonnummer":
-            if personer[2] == sokeTekst:
-                print("Telefonnummer {0} tilhører {1} {2}".format(personer[2], personer[0], personer[1]))
-            else:
-                print("Telefonnummer " + sokeTekst + " er ikke registrert.")
-                sokPerson()
+    mydb = mysql.connector.connect(
+    host = "localhost",
+    user="root",
+    password="",
+    database="telefonDB"
+    )
+
+    mycursor = mydb.cursor()
+
+    mycursor.execute("SELECT * FROM telefonkatalog where " + typeSok + " ='" + sokeTekst + "")
+
+    myresult = mycursor.fetchall()
+
+    for x in myresult:
+        print(x)
+
+
+def lagreIDatabase (fornavn,etternavn, telefonnummer):
+
+    mydb = mysql.connector.connect(
+    host = "localhost",
+    user="root",
+    password="",
+    database="telefonDB"
+    )
+
+    mycursor = mydb.cursor(fornavn, etternavn, telefonnummer)
+
+    sql= "INSERT INTO telefonkatalog (fornavn, etternavn, telefonnummer) VALUES (%s, %s, %s)"
+    val = (fornavn, etternavn, telefonnummer)
+    mycursor.execute(sql, val)
+    
+       
+    mydb.commit()
+
+    print(mycursor.rowcount, "record inserted.")
 
 printMeny()
