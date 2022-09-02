@@ -1,14 +1,19 @@
 import pandas as pd
 import mysql.connector
 
-mydb = mysql.connector.connect(
-    host="10.10.0.1",
-    user="simen",
-    password="1234",
-    database="telefondb"
-)
+def conn(_host="localhost", _user="root", _password="", _database="telefondb"):
+    global mydb, mycursor
 
-mycursor = mydb.cursor()
+    mydb = mysql.connector.connect(
+        host=_host,
+        user=_user,
+        password=_password,
+        database=_database
+    )
+
+    mycursor = mydb.cursor()
+
+conn()
 
 mycursor.execute("SELECT * FROM telefonkatalog")
 
@@ -20,10 +25,11 @@ telefonkatalog = pd.DataFrame(myresult, columns=['id', 'fornavn', 'etternavn', '
 
 def printMeny():
     print("--------------- Telefonkatalog ---------------")
-    print("| 1.Legg til ny person                       |")
+    print("| 1. Legg til ny person                      |")
     print("| 2. Søk opp person eller telefonnummer      |") 
     print("| 3. Vis alle personer                       |") 
-    print("| 4. Avslutt                                 |") 
+    print("| 4. Slett personer                          |") 
+    print("| 5. Avslutt                                 |")
     print("----------------------------------------------") 
 
 
@@ -38,15 +44,16 @@ def registrerPerson ():
     val = (fornavn, etternavn, telefonnummer)
     mycursor.execute(sql, val)
     
-    mydb.commit()
+    mydb.commit()    
 
     nyRegistrering = {
+        "id": [int(mycursor.lastrowid)],
         "fornavn": [fornavn],
         "etternavn": [etternavn],
         "telefonnummer": [telefonnummer]
         }
     
-    newdf = pd.DataFrame(nyRegistrering, columns=["fornavn", "etternavn", "telefonnummer"])
+    newdf = pd.DataFrame(nyRegistrering, columns=["id", "fornavn", "etternavn", "telefonnummer"])
     
     telefonkatalog = pd.concat([telefonkatalog, newdf])
     
@@ -91,24 +98,63 @@ def sokPerson():
     input("Trykk en tast for å gå tilbake til menyen")
 
 
-def visAllePersoner(pandaForm=False): 
+def visAllePersoner(form="erik"): 
     if telefonkatalog.empty:
         print("Det er ingen registrerte personer i katalogen")
-        input("Trykk en tast for å gå tilbake til menyen")
+        
         return
     
-    if pandaForm:
+    if form == "panda":
         print(telefonkatalog)
-        input("Trykk en tast for å gå tilbake til menyen")
-    else:
+    
+    elif form == "medid":
         print("************************************************************************************")
         for index, personer in telefonkatalog.iterrows():
             
-            print("*Fornavn: {:15s} Etternavn: {:15s} Telefonnummer: {:8s}".format(personer["fornavn"], personer["etternavn"], personer["telefonnummer"]))
+            print("*Fornavn: {:15s} Etternavn: {:15s} Telefonnummer: {:8s} Id: {:2s} *".format(personer["fornavn"], personer["etternavn"], personer["telefonnummer"], str(personer["id"])))
         print("************************************************************************************")
+    
+    elif form == "erik":
+        print("************************************************************************************")
+        for index, personer in telefonkatalog.iterrows():
+            
+            print("*Fornavn: {:15s} Etternavn: {:15s} Telefonnummer: {:8s} *".format(personer["fornavn"], personer["etternavn"], personer["telefonnummer"]))
+        print("************************************************************************************")
+    else:
+        print("Du har gitt en feil form")
         
-        input("Trykk en tast for å gå tilbake til menyen")
+        
 
+def sletting(df):
+    global telefonkatalog
+    
+    telefonkatalog = telefonkatalog.drop(df.index)
+    
+    mycursor.execute("DELETE FROM telefonkatalog WHERE id = '" + str(df.iat[0, 0]) + "'")
+    mydb.commit()
+    
+        
+
+def velgPersonSletting():
+    
+    visAllePersoner("medid")
+    
+    slettId = input("Skriv inn id på den du vil slette, eller skriv N for å gå ut: ")
+    
+    if slettId == "N" or slettId == "n":
+        return
+    elif not slettId.isnumeric():
+        print("Id kan ikke være bokstaver")
+        return
+
+    slettdf = telefonkatalog.loc[telefonkatalog["id"] == int(slettId)]
+    
+    if slettdf.empty:
+        print("fant ingen info med den id-en")
+        return
+    
+    sletting(slettdf)
+        
 
 def utfoerMenyvalg(valgtTall):
     global kjorer
@@ -122,20 +168,20 @@ def utfoerMenyvalg(valgtTall):
 
     elif valgtTall == "3":
         visAllePersoner()
+        input("Trykk en tast for å gå tilbake til menyen")
 
     elif valgtTall == "4":
+        velgPersonSletting()
+    
+    elif valgtTall == "5":
         bekreftelse = input("Er du sikker på at du ivl avslutte? J/N")
         if bekreftelse == "J" or bekreftelse == "j":
             kjorer = False
             
         else:
             return
-    
-    elif valgtTall == "5":
-        pass
-
     else:
-        nyttForsoek = input("Ugyldig valg. Velg et tall mellom 1-4")
+        nyttForsoek = input("Ugyldig valg. Velg et tall mellom 1-5")
         utfoerMenyvalg(nyttForsoek)
 
 
